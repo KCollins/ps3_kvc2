@@ -1,4 +1,7 @@
 #include <ros/ros.h>
+#include <stdio.h>
+#include <std_msgs/Float64.h>
+#include <iostream>
 #include <actionlib/server/simple_action_server.h>
 #include <ps3_kvc2/SineAction.h>
 
@@ -41,10 +44,11 @@ public:
     feedback_.sequence.push_back(1);
 
     // publish info to the console for the user
-    ROS_INFO("%s: Executing, creating Sine sequence of order %i with seeds %i, %i", action_name_.c_str(), goal->order, feedback_.sequence[0], feedback_.sequence[1]);
+    //ROS_INFO("%s: Executing, creating Sine wave of %i with seeds %i, %i", action_name_.c_str(), goal->cycles, feedback_.sequence[0], feedback_.sequence[1]);
+    ROS_INFO("%s: Executing, creating Sine wave of %i cycles with amplitude %f and frequency %f.", action_name_.c_str(), goal->cycles, goal->amplitude, goal->frequency);
 
     // start executing the action
-    for(int i=1; i<=goal->order; i++)
+    for(int i=1; i<=goal->cycles; i++)
     {
       // check that preempt has not been requested by the client
       if (as_.isPreemptRequested() || !ros::ok())
@@ -74,12 +78,11 @@ public:
 
 };
 
-
+using namespace std;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "Sine");
   ROS_INFO("Server is ready.");
-
   SineAction Sine(ros::this_node::getName());
   ros::spin();
 

@@ -1,0 +1,4 @@
+<launch>
+	<node name="sine_server" pkg="ps3_kvc2" type="sine_server" />
+	<node name="sine_client" pkg="ps3_kvc2" type="sine_client" />
+</launch>

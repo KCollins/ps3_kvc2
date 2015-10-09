@@ -1,5 +1,7 @@
-#goal definition
-int32 order
+#goal definition: amplitude, frequency and number of cycles
+float64 amplitude
+float64 frequency
+int32 cycles
 ---
 #result definition
 int32[] sequence

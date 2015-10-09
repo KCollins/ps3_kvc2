@@ -1,8 +1,12 @@
 #include <ros/ros.h>
+#include <stdio.h>
+#include <std_msgs/Float64.h>
+#include <iostream>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 #include <ps3_kvc2/SineAction.h>
 
+using namespace std;
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "test_Sine");
@@ -15,10 +19,19 @@ int main (int argc, char **argv)
   // wait for the action server to start
   ac.waitForServer(); //will wait for infinite time
 
-  ROS_INFO("Action server started, sending goal.");
-  // send a goal to the action
+  ROS_INFO("Action server started!");
+
   ps3_kvc2::SineGoal goal;
-  goal.order = 20;
+  std::cout << "Hello, world! \n";
+  std::cout << "Please enter your desired amplitude. \n";
+  std::cin >> goal.amplitude;
+    std::cout << "Please enter your desired frequency. \n";
+  std::cin >> goal.frequency;
+  std::cout << "Hello there. Please enter a desired number of cycles. \n";
+  std::cin >> goal.cycles;
+
+  // send a goal to the action
+  ROS_INFO("Sending goal.");
   ac.sendGoal(goal);
 
   //wait for the action to return
