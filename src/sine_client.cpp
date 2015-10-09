@@ -25,9 +25,9 @@ int main (int argc, char **argv)
   std::cout << "Hello, world! \n";
   std::cout << "Please enter your desired amplitude. \n";
   std::cin >> goal.amplitude;
-    std::cout << "Please enter your desired frequency. \n";
+    std::cout << "Please enter your desired frequency, in rads/sec. \n";
   std::cin >> goal.frequency;
-  std::cout << "Hello there. Please enter a desired number of cycles. \n";
+  std::cout << "Please enter a desired number of cycles. \n";
   std::cin >> goal.cycles;
 
   // send a goal to the action

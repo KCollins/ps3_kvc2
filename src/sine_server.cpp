@@ -1,9 +1,18 @@
 #include <ros/ros.h>
-#include <stdio.h>
 #include <std_msgs/Float64.h>
-#include <iostream>
+#include <std_msgs/Int32.h>
 #include <actionlib/server/simple_action_server.h>
 #include <ps3_kvc2/SineAction.h>
+#define PI 3.14159265
+#define dt .010
+
+std_msgs::Float64 amp;
+std_msgs::Float64 freq;
+std_msgs::Int32 cyc;
+std_msgs::Float64 period;
+std_msgs::Float64 duration;
+std_msgs::Float64 input_float, vel_cmd; 
+//std_msgs::Float64 dt;
 
 class SineAction
 {
@@ -14,6 +23,7 @@ protected:
   actionlib::SimpleActionServer<ps3_kvc2::SineAction> as_; 
   std::string action_name_;
   // create messages that are used to published feedback/result
+  ps3_kvc2::SineGoal goal_;
   ps3_kvc2::SineFeedback feedback_;
   ps3_kvc2::SineResult result_;
 
@@ -45,20 +55,19 @@ public:
 
     // publish info to the console for the user
     //ROS_INFO("%s: Executing, creating Sine wave of %i with seeds %i, %i", action_name_.c_str(), goal->cycles, feedback_.sequence[0], feedback_.sequence[1]);
-    ROS_INFO("%s: Executing, creating Sine wave of %i cycles with amplitude %f and frequency %f.", action_name_.c_str(), goal->cycles, goal->amplitude, goal->frequency);
+    ROS_INFO("%s: Executing, creating a sine wave of %i cycles with amplitude %f and frequency %f.", action_name_.c_str(), goal->cycles, goal->amplitude, goal->frequency);
+    
+    amp.data = goal->amplitude;
+    freq.data = goal->frequency;
+    cyc.data = goal->cycles;
+    period.data=(2 * PI)/freq.data; //duration of one cycle
+    duration.data=period.data*cyc.data; //total duration, in seconds.
+
 
     // start executing the action
     for(int i=1; i<=goal->cycles; i++)
     {
-      // check that preempt has not been requested by the client
-      if (as_.isPreemptRequested() || !ros::ok())
-      {
-        ROS_INFO("%s: Preempted", action_name_.c_str());
-        // set the action state to preempted
-        as_.setPreempted();
-        success = false;
-        break;
-      }
+
       feedback_.sequence.push_back(feedback_.sequence[i] + feedback_.sequence[i-1]);
       // publish the feedback
       as_.publishFeedback(feedback_);
@@ -74,8 +83,6 @@ public:
       as_.setSucceeded(result_);
     }
   }
-
-
 };
 
 using namespace std;
@@ -83,8 +90,26 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "Sine");
   ROS_INFO("Server is ready.");
+    ros::NodeHandle n;
+    ros::Publisher my_publisher_object = n.advertise<std_msgs::Float64>("vel_cmd", 1);
+    ros::Publisher my_commander_object = n.advertise<std_msgs::Float64>("vel_cmd", 1);  //publish to vel_cmd topic
   SineAction Sine(ros::this_node::getName());
-  ros::spin();
+  input_float.data = 0.0;
+  vel_cmd.data = 0.0;
+  ros::Rate naptime(1/dt); //create a ros object from the ros “Rate” class;
+   //set the sleep timer for 100Hz repetition rate (arg is in units of Hz)
 
+while (ros::ok())
+    {
+        input_float.data = input_float.data + dt; // increment by 0.0001 each iteration
+        vel_cmd.data=amp.data*sin(2 * PI * freq.data * input_float.data);
+        my_publisher_object.publish(vel_cmd); // publish the value--of type Float64--
+        // to the topic "topic1"
+  // the next line will cause the loop to sleep for the balance of the desired period 
+        // to achieve the specified loop frequency 
+  naptime.sleep(); 
+  //ros::spinOnce();
+  ros::spin();
   return 0;
+    }
 }
