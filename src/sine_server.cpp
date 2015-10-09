@@ -9,8 +9,9 @@
 std_msgs::Float64 amp;
 std_msgs::Float64 freq;
 std_msgs::Int32 cyc;
+double cycle_count;
 std_msgs::Float64 period;
-std_msgs::Float64 duration;
+double duration;
 std_msgs::Float64 input_float, vel_cmd; 
 //std_msgs::Float64 dt;
 
@@ -60,8 +61,6 @@ public:
     amp.data = goal->amplitude;
     freq.data = goal->frequency;
     cyc.data = goal->cycles;
-    period.data=(2 * PI)/freq.data; //duration of one cycle
-    duration.data=period.data*cyc.data; //total duration, in seconds.
 
 
     // start executing the action
@@ -92,24 +91,37 @@ int main(int argc, char** argv)
   ROS_INFO("Server is ready.");
     ros::NodeHandle n;
     ros::Publisher my_publisher_object = n.advertise<std_msgs::Float64>("vel_cmd", 1);
-    ros::Publisher my_commander_object = n.advertise<std_msgs::Float64>("vel_cmd", 1);  //publish to vel_cmd topic
   SineAction Sine(ros::this_node::getName());
   input_float.data = 0.0;
-  vel_cmd.data = 0.0;
+  vel_cmd.data = 0.0; 
   ros::Rate naptime(1/dt); //create a ros object from the ros “Rate” class;
    //set the sleep timer for 100Hz repetition rate (arg is in units of Hz)
 
 while (ros::ok())
     {
-        input_float.data = input_float.data + dt; // increment by 0.0001 each iteration
+        ros::spinOnce();
+        period.data=(2 * PI)/freq.data; //duration of one cycle
+        duration=period.data*cyc.data; //total duration, in seconds.
+
+      if (duration >= cycle_count){
         vel_cmd.data=amp.data*sin(2 * PI * freq.data * input_float.data);
+        ROS_INFO("Generating a sine wave now...");
+        input_float.data = input_float.data + dt; // increment by dt each iteration
+        cycle_count=cycle_count+(dt/period.data);
+
+      } else {
+        input_float.data = 0.0;
+        vel_cmd.data = 0.0;
+        cycle_count = 0.0;
+      }
+
         my_publisher_object.publish(vel_cmd); // publish the value--of type Float64--
         // to the topic "topic1"
   // the next line will cause the loop to sleep for the balance of the desired period 
         // to achieve the specified loop frequency 
   naptime.sleep(); 
   //ros::spinOnce();
-  ros::spin();
+  //ros::spin();
   return 0;
     }
 }
