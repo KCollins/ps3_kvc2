@@ -21,7 +21,7 @@ private:
   ros::NodeHandle nh_;
   // NodeHandle instance must be created before this line. Otherwise strange error may occur.
   actionlib::SimpleActionServer<ps3_kvc2::SineAction> as_; 
-  std::string action_name_;
+  //std::string action_name_;
   // create messages that are used to published feedback/result
   ps3_kvc2::SineGoal goal_;
   ps3_kvc2::SineFeedback feedback_;
@@ -57,7 +57,8 @@ void SineServer::executeCB(const actionlib::SimpleActionServer<ps3_kvc2::SineAct
     bool success = true;
 
     // publish info to the console for the user
-    ROS_INFO("%s: Executing, creating a sine wave of %i cycles with amplitude %f and frequency %f.", action_name_.c_str(), goal->cycles, goal->amplitude, goal->frequency);
+    
+    //ROS_INFO("%s: Executing, creating a sine wave of %i cycles with amplitude %f and frequency %f.", action_name_.c_str(), goal->cycles, goal->amplitude, goal->frequency);
     
     amp.data = goal->amplitude;
     freq.data = goal->frequency;
