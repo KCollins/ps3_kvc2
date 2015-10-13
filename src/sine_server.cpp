@@ -17,7 +17,6 @@ std_msgs::Float64 input_float, vel_cmd;
 
 class SineServer {
 private:
-
   ros::NodeHandle nh_;
   // NodeHandle instance must be created before this line. Otherwise strange error may occur.
   actionlib::SimpleActionServer<ps3_kvc2::SineAction> as_; 
@@ -72,15 +71,15 @@ int main(int argc, char** argv) {
     ros::NodeHandle n;
     ros::Publisher my_publisher_object = n.advertise<std_msgs::Float64>("vel_cmd", 1);
 
-    SineServer foo;
-
+    SineServer foo; //Create an instance of the server
+ROS_INFO("Server instance created.");
   input_float.data = 0.0;
   vel_cmd.data = 0.0; 
   ros::Rate naptime(1/dt); //create a ros object from the ros “Rate” class;
-   //set the sleep timer for 100Hz repetition rate (arg is in units of Hz)
 
 while (ros::ok())
     {
+    	ROS_INFO("ros::ok");
         ros::spinOnce();
         period.data=(2 * PI)/freq.data; //duration of one cycle
         duration=period.data*cyc.data; //total duration, in seconds.
@@ -97,10 +96,7 @@ while (ros::ok())
         cycle_count = 0.0;
       }
 
-        my_publisher_object.publish(vel_cmd); // publish the value--of type Float64--
-        // to the topic "topic1"
-  // the next line will cause the loop to sleep for the balance of the desired period 
-        // to achieve the specified loop frequency 
+        my_publisher_object.publish(vel_cmd); // publish the value
   naptime.sleep(); 
 
     return 0;
