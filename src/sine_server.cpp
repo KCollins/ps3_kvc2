@@ -49,11 +49,6 @@ public:
     bool success = true;
     ROS_INFO("Executing executeCB");
 
-    // push_back the seeds for the Sine sequence
-    feedback_.sequence.clear();
-    feedback_.sequence.push_back(0);
-    feedback_.sequence.push_back(1);
-
     // publish info to the console for the user
     //ROS_INFO("%s: Executing, creating Sine wave of %i with seeds %i, %i", action_name_.c_str(), goal->cycles, feedback_.sequence[0], feedback_.sequence[1]);
     ROS_INFO("%s: Executing, creating a sine wave of %i cycles with amplitude %f and frequency %f.", action_name_.c_str(), goal->cycles, goal->amplitude, goal->frequency);
@@ -61,26 +56,6 @@ public:
     amp.data = goal->amplitude;
     freq.data = goal->frequency;
     cyc.data = goal->cycles;
-
-
-    // start executing the action
-    for(int i=1; i<=goal->cycles; i++)
-    {
-
-      feedback_.sequence.push_back(feedback_.sequence[i] + feedback_.sequence[i-1]);
-      // publish the feedback
-      as_.publishFeedback(feedback_);
-      // this sleep is not necessary, the sequence is computed at 1 Hz for demonstration purposes
-      r.sleep();
-    }
-
-    if(success)
-    {
-      result_.sequence = feedback_.sequence;
-      ROS_INFO("%s: Succeeded", action_name_.c_str());
-      // set the action state to succeeded
-      as_.setSucceeded(result_);
-    }
   }
 };
 
@@ -103,7 +78,7 @@ while (ros::ok())
         period.data=(2 * PI)/freq.data; //duration of one cycle
         duration=period.data*cyc.data; //total duration, in seconds.
 
-      if (duration >= cycle_count){
+      if (cycle_count >= duration){
         vel_cmd.data=amp.data*sin(2 * PI * freq.data * input_float.data);
         ROS_INFO("Generating a sine wave now...");
         input_float.data = input_float.data + dt; // increment by dt each iteration

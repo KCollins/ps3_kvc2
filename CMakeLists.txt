@@ -1,44 +1,24 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ps3_kvc2)
 
-find_package(catkin REQUIRED COMPONENTS roscpp actionlib actionlib_msgs)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(catkin_simple REQUIRED)
 
-add_action_files(
-  DIRECTORY action
-  FILES Sine.action
-)
+catkin_simple()
 
-generate_messages(
-  DEPENDENCIES actionlib_msgs std_msgs
-)
+# example boost usage
+# find_package(Boost REQUIRED COMPONENTS system thread)
 
-catkin_package(
-  CATKIN_DEPENDS actionlib_msgs
-)
+# C++0x support - not quite the same as final C++11!
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+# Libraries
+# cs_add_library(my_lib src/my_lib.cpp)   
 
-add_executable(sine_server src/sine_server.cpp)
+# Executables
+cs_add_executable(sine_client src/sine_client)
+cs_add_executable(sine_server src/sine_server.cpp)
+cs_add_executable(controller src/controller.cpp)
+cs_add_executable(simulator src/simulator.cpp)
 
-target_link_libraries(
-  sine_server
-  ${catkin_LIBRARIES}
-)
-
-add_dependencies(
-  sine_server
-  ${ps3_kvc2_EXPORTED_TARGETS}
-)
-
-add_executable(sine_client src/sine_client.cpp)
-
-target_link_libraries( 
-  sine_client
-  ${catkin_LIBRARIES}
-)
-
-add_dependencies(
-  sine_client
-  ${ps3_kvc2_EXPORTED_TARGETS}
-)
+cs_install()
+cs_export()

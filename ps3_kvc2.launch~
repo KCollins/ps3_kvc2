@@ -1,5 +1,6 @@
 <launch>
 	<node name="sine_server" pkg="ps3_kvc2" type="sine_server" />
+	<node name="sine_client" pkg="ps3_kvc2" type="sine_client" />
 	<node name="controller" pkg="ps3_kvc2" type="controller" />
 	<node name="simulator" pkg="ps3_kvc2" type="simulator" />
 </launch>
