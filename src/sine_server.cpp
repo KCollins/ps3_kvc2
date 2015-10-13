@@ -79,18 +79,18 @@ ROS_INFO("Server instance created.");
 
 while (ros::ok())
     {
-    	ROS_INFO("ros::ok");
         ros::spinOnce();
         period.data=(2 * PI)/freq.data; //duration of one cycle
         duration=period.data*cyc.data; //total duration, in seconds.
 
-      if (cycle_count >= duration){
+      if (cycle_count <= cyc.data){
         vel_cmd.data=amp.data*sin(2 * PI * freq.data * input_float.data);
         ROS_INFO("Generating a sine wave now...");
         input_float.data = input_float.data + dt; // increment by dt each iteration
         cycle_count=cycle_count+(dt/period.data);
 
       } else {
+      	ROS_INFO("Requested number of cycles ends");
         input_float.data = 0.0;
         vel_cmd.data = 0.0;
         cycle_count = 0.0;
@@ -99,5 +99,5 @@ while (ros::ok())
         my_publisher_object.publish(vel_cmd); // publish the value
   naptime.sleep(); 
 
-    return 0;
+    
 }}
