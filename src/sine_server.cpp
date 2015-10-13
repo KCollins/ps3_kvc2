@@ -37,15 +37,6 @@ public:
     void executeCB(const actionlib::SimpleActionServer<ps3_kvc2::SineAction>::GoalConstPtr& goal);
 };
 
-//implementation of the constructor:
-// member initialization list describes how to initialize member as_
-// member as_ will get instantiated with specified node-handle, name by which this server will be known,
-//  a pointer to the function to be executed upon receipt of a goal.
-//  
-// Syntax of naming the function to be invoked: get a pointer to the function, called executeCB, which is a member method
-// of our class SineServer.  Since this is a class method, we need to tell boost::bind that it is a class member,
-// using the "this" keyword.  the _1 argument says that our executeCB takes one argument
-// the final argument  "false" says don't start the server yet.  (We'll do this in the constructor)
 
 SineServer::SineServer() :
    as_(nh_, "sine", boost::bind(&SineServer::executeCB, this, _1),false) 
@@ -53,51 +44,35 @@ SineServer::SineServer() :
 //  clients will need to refer to this name to connect with this server
 {
     ROS_INFO("in constructor of SineServer...");
-    // do any other desired initializations here...specific to your implementation
 
     as_.start(); //start the server running
+    ROS_INFO("Server has started for realsies.");
 }
 
 
 void SineServer::executeCB(const actionlib::SimpleActionServer<ps3_kvc2::SineAction>::GoalConstPtr& goal) {
-    //ROS_INFO("in executeCB");
-    //ROS_INFO("goal input is: %d", goal->input);
-    //do work here: this is where your interesting code goes
-    
-    //....
-
-    // for illustration, populate the "result" message with two numbers:
-    // the "input" is the message count, copied from goal->input (as sent by the client)
-    // the "goal_stamp" is the server's count of how many goals it has serviced so far
-    // if there is only one client, and if it is never restarted, then these two numbers SHOULD be identical...
-    // unless some communication got dropped, indicating an error
-    // send the result message back with the status of "success"
+    ROS_INFO("in executeCB");
 
     ros::Rate r(1);
     bool success = true;
-    ROS_INFO("Executing executeCB");
 
     // publish info to the console for the user
-    //ROS_INFO("%s: Executing, creating Sine wave of %i with seeds %i, %i", action_name_.c_str(), goal->cycles, feedback_.sequence[0], feedback_.sequence[1]);
     ROS_INFO("%s: Executing, creating a sine wave of %i cycles with amplitude %f and frequency %f.", action_name_.c_str(), goal->cycles, goal->amplitude, goal->frequency);
     
     amp.data = goal->amplitude;
     freq.data = goal->frequency;
     cyc.data = goal->cycles;
-    
-    // the class owns the action server, so we can use its member methods here
-   
-    // DEBUG: if client and server remain in sync, all is well--else whine and complain and quit
-    // NOTE: this is NOT generically useful code; server should be happy to accept new clients at any time, and
-    // no client should need to know how many goals the server has serviced to date
 
 }
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "Sine");
-  ROS_INFO("Server is ready.");
+  ROS_INFO("Server main has started.");
     ros::NodeHandle n;
     ros::Publisher my_publisher_object = n.advertise<std_msgs::Float64>("vel_cmd", 1);
+
+    SineServer foo;
+
   input_float.data = 0.0;
   vel_cmd.data = 0.0; 
   ros::Rate naptime(1/dt); //create a ros object from the ros “Rate” class;
