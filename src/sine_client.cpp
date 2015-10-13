@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
             std_msgs::Float64 amplitude;
             std_msgs::Float64 frequency;
             std_msgs::Int32 cycles;
-            std::cout << "Please enter your desired amplitude. \n";
+            std::cout << "Please enter your desired peak amplitude. \n";
             std::cin >> amplitude.data;
             goal.amplitude = amplitude.data;
             std::cout << "Please enter your desired frequency, in rads/sec. \n";

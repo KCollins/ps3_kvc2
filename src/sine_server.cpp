@@ -10,7 +10,7 @@
 std_msgs::Float64 amp;
 std_msgs::Float64 freq;
 std_msgs::Int32 cyc;
-double cycle_count;
+double cycle_time;
 std_msgs::Float64 period;
 double duration;
 std_msgs::Float64 input_float, vel_cmd; 
@@ -83,21 +83,21 @@ while (ros::ok())
         period.data=(2 * PI)/freq.data; //duration of one cycle
         duration=period.data*cyc.data; //total duration, in seconds.
 
-      if (cycle_count <= cyc.data){
-        vel_cmd.data=amp.data*sin(2 * PI * freq.data * input_float.data);
+      if (cycle_time <= cyc.data){
+        vel_cmd.data=amp.data*sin(2 * PI * freq.data * input_float.data); 
         ROS_INFO("Generating a sine wave now...");
-        input_float.data = input_float.data + dt; // increment by dt each iteration
-        cycle_count=cycle_count+(dt/period.data);
+        cycle_time=cycle_time+dt;
 
       } else {
       	ROS_INFO("Requested number of cycles ends");
-        input_float.data = 0.0;
-        vel_cmd.data = 0.0;
-        cycle_count = 0.0;
+        vel_cmd.data = 0.00;
+        cycle_time = 0.1;
+        cyc.data=0.0;
       }
 
-        my_publisher_object.publish(vel_cmd); // publish the value
-  naptime.sleep(); 
+      input_float.data = input_float.data + dt; // increment by dt each iteration
+      my_publisher_object.publish(vel_cmd); // publish the value
+  	  naptime.sleep(); 
 
     
 }}
