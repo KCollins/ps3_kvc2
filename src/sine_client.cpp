@@ -1,50 +1,62 @@
 #include <ros/ros.h>
 #include <stdio.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Int32.h>
 #include <iostream>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 #include <ps3_kvc2/SineAction.h>
 
-using namespace std;
-int main (int argc, char **argv)
-{
-  ros::init(argc, argv, "test_Sine");
 
-  // create the action client
-  // true causes the client to spin its own thread
-  actionlib::SimpleActionClient<ps3_kvc2::SineAction> ac("Sine", true);
+int main(int argc, char** argv) {
+        ros::init(argc, argv, "sine_client"); // name this node 
+        // here is a "goal" object compatible with the server, as defined in sine_server/action
+        ps3_kvc2::SineGoal goal; 
+        actionlib::SimpleActionClient<ps3_kvc2::SineAction> action_client("sine", true);
+        
+        // attempt to connect to the server:
+        ROS_INFO("waiting for server: ");
+        bool server_exists = action_client.waitForServer(ros::Duration(5.0)); // wait for up to 5 seconds
+        // something odd in above: does not seem to wait for 5 seconds, but returns rapidly if server not running
+        //bool server_exists = action_client.waitForServer(); //wait forever
 
-  ROS_INFO("Waiting for action server to start.");
-  // wait for the action server to start
-  ac.waitForServer(); //will wait for infinite time
+        if (!server_exists) {
+            ROS_WARN("could not connect to server; halting");
+            return 0; // bail out; optionally, could print a warning message and retry
+        }
+        
+       
+        ROS_INFO("connected to action server");  // if here, then we connected to the server;
 
-  ROS_INFO("Action server started!");
+        while(true) {
+        // stuff a goal message:
+            ps3_kvc2::SineGoal goal;
+            std_msgs::Float64 amplitude;
+            std_msgs::Float64 frequency;
+            std_msgs::Int32 cycles;
+            std::cout << "Hello, world! \n";
+            std::cout << "Please enter your desired amplitude. \n";
+            std::cin >> amplitude.data;
+            goal.amplitude = amplitude.data;
+            std::cout << "Please enter your desired frequency, in rads/sec. \n";
+            //std::cin >> goal.frequency;
+            std::cout << "Please enter a desired number of cycles. \n";
+            //std::cin >> goal.cycles;
+        
+        action_client.sendGoal(goal); // simple example--send goal, but do not specify callbacks
+        //action_client.sendGoal(goal,&doneCb); 
 
-  ps3_kvc2::SineGoal goal;
-  std::cout << "Hello, world! \n";
-  std::cout << "Please enter your desired amplitude. \n";
-  std::cin >> goal.amplitude;
-    std::cout << "Please enter your desired frequency, in rads/sec. \n";
-  std::cin >> goal.frequency;
-  std::cout << "Please enter a desired number of cycles. \n";
-  std::cin >> goal.cycles;
+        bool finished_before_timeout = action_client.waitForResult(ros::Duration(5.0));
+        //bool finished_before_timeout = action_client.waitForResult(); // wait forever...
+        if (!finished_before_timeout) {
+            ROS_WARN("giving up waiting on result",);
+            return 0;
+        }
+        else {
+          //if here, then server returned a result to us
+        }
+        
+        }
 
-  // send a goal to the action
-  ROS_INFO("Sending goal.");
-  ac.sendGoal(goal);
-
-  //wait for the action to return
-  bool finished_before_timeout = ac.waitForResult(ros::Duration(30.0));
-
-  if (finished_before_timeout)
-  {
-    actionlib::SimpleClientGoalState state = ac.getState();
-    ROS_INFO("Action finished: %s",state.toString().c_str());
-  }
-  else
-    ROS_INFO("Action did not finish before the time out.");
-
-  //exit
-  return 0;
+    return 0;
 }

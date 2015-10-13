@@ -3,6 +3,7 @@
 #include <std_msgs/Int32.h>
 #include <actionlib/server/simple_action_server.h>
 #include <ps3_kvc2/SineAction.h>
+
 #define PI 3.14159265
 #define dt .010
 
@@ -13,11 +14,9 @@ double cycle_count;
 std_msgs::Float64 period;
 double duration;
 std_msgs::Float64 input_float, vel_cmd; 
-//std_msgs::Float64 dt;
 
-class SineAction
-{
-protected:
+class SineServer {
+private:
 
   ros::NodeHandle nh_;
   // NodeHandle instance must be created before this line. Otherwise strange error may occur.
@@ -28,23 +27,52 @@ protected:
   ps3_kvc2::SineFeedback feedback_;
   ps3_kvc2::SineResult result_;
 
+
 public:
+    SineServer(); //define the body of the constructor outside of class definition
 
-  SineAction(std::string name) :
-    as_(nh_, name, boost::bind(&SineAction::executeCB, this, _1), false),
-    action_name_(name)
-  {
-     ROS_INFO("Class construction.");
-    as_.start();
-  }
+    ~SineServer(void) {
+    }
+    // Action Interface
+    void executeCB(const actionlib::SimpleActionServer<ps3_kvc2::SineAction>::GoalConstPtr& goal);
+};
 
-  ~SineAction(void)
-  {
-  }
+//implementation of the constructor:
+// member initialization list describes how to initialize member as_
+// member as_ will get instantiated with specified node-handle, name by which this server will be known,
+//  a pointer to the function to be executed upon receipt of a goal.
+//  
+// Syntax of naming the function to be invoked: get a pointer to the function, called executeCB, which is a member method
+// of our class SineServer.  Since this is a class method, we need to tell boost::bind that it is a class member,
+// using the "this" keyword.  the _1 argument says that our executeCB takes one argument
+// the final argument  "false" says don't start the server yet.  (We'll do this in the constructor)
 
-  void executeCB(const ps3_kvc2::SineGoalConstPtr &goal)
-  {
-    // helper variables
+SineServer::SineServer() :
+   as_(nh_, "sine", boost::bind(&SineServer::executeCB, this, _1),false) 
+// in the above initialization, we name the server "sine"
+//  clients will need to refer to this name to connect with this server
+{
+    ROS_INFO("in constructor of SineServer...");
+    // do any other desired initializations here...specific to your implementation
+
+    as_.start(); //start the server running
+}
+
+
+void SineServer::executeCB(const actionlib::SimpleActionServer<ps3_kvc2::SineAction>::GoalConstPtr& goal) {
+    //ROS_INFO("in executeCB");
+    //ROS_INFO("goal input is: %d", goal->input);
+    //do work here: this is where your interesting code goes
+    
+    //....
+
+    // for illustration, populate the "result" message with two numbers:
+    // the "input" is the message count, copied from goal->input (as sent by the client)
+    // the "goal_stamp" is the server's count of how many goals it has serviced so far
+    // if there is only one client, and if it is never restarted, then these two numbers SHOULD be identical...
+    // unless some communication got dropped, indicating an error
+    // send the result message back with the status of "success"
+
     ros::Rate r(1);
     bool success = true;
     ROS_INFO("Executing executeCB");
@@ -56,17 +84,20 @@ public:
     amp.data = goal->amplitude;
     freq.data = goal->frequency;
     cyc.data = goal->cycles;
-  }
-};
+    
+    // the class owns the action server, so we can use its member methods here
+   
+    // DEBUG: if client and server remain in sync, all is well--else whine and complain and quit
+    // NOTE: this is NOT generically useful code; server should be happy to accept new clients at any time, and
+    // no client should need to know how many goals the server has serviced to date
 
-using namespace std;
-int main(int argc, char** argv)
-{
+}
+
+int main(int argc, char** argv) {
   ros::init(argc, argv, "Sine");
   ROS_INFO("Server is ready.");
     ros::NodeHandle n;
     ros::Publisher my_publisher_object = n.advertise<std_msgs::Float64>("vel_cmd", 1);
-  SineAction Sine(ros::this_node::getName());
   input_float.data = 0.0;
   vel_cmd.data = 0.0; 
   ros::Rate naptime(1/dt); //create a ros object from the ros “Rate” class;
@@ -95,8 +126,6 @@ while (ros::ok())
   // the next line will cause the loop to sleep for the balance of the desired period 
         // to achieve the specified loop frequency 
   naptime.sleep(); 
-  //ros::spinOnce();
-  //ros::spin();
-  return 0;
-    }
-}
+
+    return 0;
+}}
