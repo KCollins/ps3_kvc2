@@ -7,6 +7,15 @@
 #include <actionlib/client/terminal_state.h>
 #include <ps3_kvc2/SineAction.h>
 
+
+void doneCb(const actionlib::SimpleClientGoalState& state, const ps3_kvc2::SineResultConstPtr& result) {
+    if(result->success){
+        ROS_INFO("Success.");
+    } else {
+        ROS_INFO("Er... not success.");
+    }
+}
+
 int main(int argc, char** argv) {
         ros::init(argc, argv, "sine_client"); // name this node 
         ps3_kvc2::SineGoal goal; 
@@ -35,7 +44,7 @@ int main(int argc, char** argv) {
             std::cout << "Please enter your desired peak amplitude. \n";
             std::cin >> amplitude.data;
             goal.amplitude = amplitude.data;
-            std::cout << "Please enter your desired frequency, in rads/sec. \n";
+            std::cout << "Please enter your desired frequency, in Hz. \n";
             std::cin >> goal.frequency;
             std::cout << "Please enter a desired number of cycles. \n";
             std::cin >> goal.cycles;

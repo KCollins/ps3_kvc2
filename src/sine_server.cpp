@@ -53,7 +53,8 @@ void SineServer::executeCB(const actionlib::SimpleActionServer<ps3_kvc2::SineAct
     ROS_INFO("in executeCB");
 
     ros::Rate r(1);
-    bool success = true;
+    //bool success = true;
+ 
 
     // publish info to the console for the user
     
@@ -62,6 +63,11 @@ void SineServer::executeCB(const actionlib::SimpleActionServer<ps3_kvc2::SineAct
     amp.data = goal->amplitude;
     freq.data = goal->frequency;
     cyc.data = goal->cycles;
+    result_.success = true;
+       as_.setSucceeded(result_);
+            //period.data=(2 * PI)/freq.data; //duration of one cycle in rad/s
+    period.data = 1/freq.data;
+    duration=period.data*cyc.data; //total duration, in seconds.
 
 }
 
@@ -80,18 +86,15 @@ ROS_INFO("Server instance created.");
 while (ros::ok())
     {
         ros::spinOnce();
-        period.data=(2 * PI)/freq.data; //duration of one cycle
-        duration=period.data*cyc.data; //total duration, in seconds.
 
-      if (cycle_time <= cyc.data){
+      if (duration >= dt){
         vel_cmd.data=amp.data*sin(2 * PI * freq.data * input_float.data); 
         ROS_INFO("Generating a sine wave now...");
-        cycle_time=cycle_time+dt;
+        duration = duration - dt;
 
       } else {
       	ROS_INFO("Requested number of cycles ends");
         vel_cmd.data = 0.00;
-        cycle_time = 0.1;
         cyc.data=0.0;
       }
 

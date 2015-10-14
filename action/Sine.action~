@@ -4,7 +4,7 @@ float64 frequency
 int32 cycles
 ---
 #result definition: goal succeeded
-int32[] sequence
+bool success
 ---
 #feedback definition: 
-int32[] sequence
+int32 fdbk

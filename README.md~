@@ -1,0 +1,13 @@
+# ps3_kvc2
+
+In this assignment, the action client connects to the action server, accepts user input for desired amplitude, frequency and number of cycles, passes the inputs as goals  (/sine) to the action server, and accepts a boolean as a result from the action server. The action server publishes a topic vel _ cmd, which is subscribed to by the controller and simulator nodes from previous assignments. These relationships can be shown using rqt_graph.
+
+## Example usage
+1) First terminal: roscd, catkin_make, roscore.
+2) Second terminal: roslaunch ps3_kvc2 ps3_kvc2.launch
+3) Third terminal: rqt_plot
+4) Fourth terminal: rosrun ps3_kvc2 sine_client
+5) In terminal 4, supply numbers and watch rqt_plot change. 
+
+## Running tests/demos
+
